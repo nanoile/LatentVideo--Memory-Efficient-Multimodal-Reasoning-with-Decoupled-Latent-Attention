@@ -1,0 +1,34 @@
+# If you change model_config.base_model or size (4B/8B), re-run extract_teacher_features and rebuild cached_features/.
+distillation:
+  num_samples: 50000
+  batch_size: 1  # Reduced to 1 for memory
+  num_epochs: 3
+  # Keep lr + warmup in sync with configs/deepspeed_config_cached.json (optimizer.lr + scheduler.params.warmup_*).
+  learning_rate: 2e-5
+  warmup_steps: 1000
+
+  loss:
+    hidden_weight: 1.0
+    logit_weight: 0.0  # Hidden-only first (stabilize); raise e.g. 0.1–0.5 after loss settles
+    temperature: 4.0  # Softer softmax when logit_weight > 0 (large vocab)
+
+  layers_to_match: [27]  # Index into teacher hidden_states; verify vs HF hidden_states length for your checkpoint
+
+deepspeed:
+  stage: 3  # informational; 8B needs ZeRO-3 (param shard). Cached train: configs/deepspeed_config_cached.json
+  gradient_accumulation_steps: 2  # informational; must match deepspeed_config_cached.json (default 2 → global batch 8 with 4×GPU, micro 1)
+  fp16: false
+  bf16: true
+
+# phase3_distillation_cached.py: AdamW LR is taken from configs/deepspeed_config_cached.json — keep in sync with distillation.learning_rate above.
+data:
+  dataset: "webvid"  # or "panda70m"
+  video_length_range: [5, 30]  # seconds
+  num_workers: 0  # Cached path: avoid worker prefetch RAM × ranks (raise to 1–2 if I/O bound)
+  dummy_seq_len: 10  # Dummy inputs_embeds seq len; must match extract_teacher_features + CachedFeatureDataset
+  # max_seq_len: 512  # optional: cap dummy inputs_embeds length to limit VRAM spikes
+
+logging:
+  wandb_project: "v-mla-qwen"
+  log_interval: 50
+  eval_interval: 1000

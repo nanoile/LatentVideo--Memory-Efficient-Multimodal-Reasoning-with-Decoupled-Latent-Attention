@@ -1,0 +1,37 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+checkpoints/
+results/
+.triton_cache/
+.torch_extensions/
+.tmp/
+.cache/
+wandb/
+.DS_Store
+*.swp
+*.swo
+.vscode/
+.idea/
+.cursor/
+
+# Local / scratch (do not publish)
+cached_features/
+torchinductor_*/
+EXPERIMENT_STATUS.md
+PROJECT_STATUS.md
+TODO.md
+*.log
+logs/
+mem_log*.txt
+training.log
+
+# Local model weights / clones (multi‑GB; download per README)
+qwen3_vl_4b/

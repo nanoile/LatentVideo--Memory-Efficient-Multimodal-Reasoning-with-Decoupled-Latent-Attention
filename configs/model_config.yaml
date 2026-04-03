@@ -1,0 +1,22 @@
+model:
+  # Hugging Face Hub id or local path (ModelScope mirror path also works if you use that layout).
+  base_model: "Qwen/Qwen3-VL-8B-Instruct"
+  # Vision-side width (vision_config.hidden_size). LM `inputs_embeds` width from HF text_config (8B: 4096).
+  hidden_size: 1152
+  num_attention_heads: 16
+  head_dim: 72
+
+mla:
+  latent_dim: 256  # Compression vs per-module hidden_size (vision/text differ; MLA reads dims from loaded layers)
+  use_decoupled_rope: true
+  rope_dim: 64  # Dedicated dimension for rotary embeddings
+
+vision:
+  patch_size: 14
+  temporal_patch_size: 2
+  max_frames: 1800  # ~1 minute at 30fps
+
+memory:
+  kv_cache_dtype: "float16"
+  use_flash_attn: true
+  gradient_checkpointing: true
